@@ -18,12 +18,11 @@ pagenurl = 'https://www.arteks.ooo/catalog/?PAGEN_1='
 #read catalog page
 result = requests.get(url=url, verify=False, headers=headers)
 soup = BeautifulSoup(result.text, 'lxml')
-with open(Path('data/catalog_arteks.json'), 'a', encoding='utf-8') as file:
-    empty_json = dict()
-    json.dumps(empty_json,)
 
 # find count of page
 cnt_page = int(soup.find_all('a', class_='pagination__pages-link')[-1].get_text('\n', strip=True))
+catalog_dct = json.loads("{}")
+image_dct = []
 
 # read all page
 for page in range(1, cnt_page + 1):
@@ -48,6 +47,7 @@ for page in range(1, cnt_page + 1):
         # find section <script> var productObject </script> and get data
         all_image = soup.find_all(['script', ], )[-1].get_text('\n', strip=True).split('=')[-1]
         temp_json = json.loads(all_image[:-1])
+        catalog_dct.update(temp_json)
 
         #get data from json
         for model in temp_json:
@@ -58,9 +58,16 @@ for page in range(1, cnt_page + 1):
             for texture in textures:
                 path = texture['mini']
                 name = path.split('/')[-1]
+                image_dct.append({name: model})
                 imgurl = 'https://www.arteks.ooo' + path
                 res = requests.get(url=imgurl, headers=headers, verify=False)
                 content = res.content
                 with open(Path(f'data/images/{collection}_{name}'), 'wb') as file:
                     file.write(content)
             break
+
+with open(Path('data/catalog_arteks.json'), 'w', encoding='utf-8') as file:
+    json.dump(catalog_dct, file, indent=4, ensure_ascii=False)
+
+with open(Path('data/catalog.json'), 'w', encoding='utf-8') as file:
+    json.dump(image_dct, file, indent=4, ensure_ascii=False)
