@@ -4,6 +4,7 @@ from bs4 import BeautifulSoup
 from pathlib import Path
 import json
 
+requests.packages.urllib3.disable_warnings()
 headers = {
     'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,/;q=0.8,'
               'application/signed-exchange;v=b3;q=0.7',
@@ -15,7 +16,7 @@ url = 'https://www.arteks.ooo/catalog/'
 pagenurl = 'https://www.arteks.ooo/catalog/?PAGEN_1='
 
 #read catalog page
-result = requests.get(url=url, verify=False)
+result = requests.get(url=url, verify=False, headers=headers)
 soup = BeautifulSoup(result.text, 'lxml')
 with open(Path('data/catalog_arteks.json'), 'a', encoding='utf-8') as file:
     empty_json = dict()
@@ -23,34 +24,43 @@ with open(Path('data/catalog_arteks.json'), 'a', encoding='utf-8') as file:
 
 # find count of page
 cnt_page = int(soup.find_all('a', class_='pagination__pages-link')[-1].get_text('\n', strip=True))
+
 # read all page
 for page in range(1, cnt_page + 1):
+    print(f'{page} страница каталога из {cnt_page} страниц.')
     result = requests.get(url=f'{pagenurl}{page}', verify=False)
     soup = BeautifulSoup(result.text, 'lxml')
 
     # find all collection and download images for collection
     all_products = soup.find_all('a', class_='catalog-item')
+    print(f'Найдено {len(all_products)} коллекций.')
     for product in all_products:
-        model = product.find(class_='catalog-item__collection').get_text('\n', strip=True)
-        model = re.sub(r'[\n\s]', '_', model)
+        collection = product.find(class_='catalog-item__collection').get_text('\n', strip=True)
+        collection = re.sub(r'[\n\s]', '_', collection)
+        print(f'Загружается коллекция {collection}.')
 
         # request page of product
         # create new link
         link = 'https://www.arteks.ooo' + product.get('href')
-        result = requests.get(link, verify=False)
+        result = requests.get(link, verify=False, headers=headers)
         soup = BeautifulSoup(result.text, 'lxml')
 
         # find section <script> var productObject </script> and get data
         all_image = soup.find_all(['script', ], )[-1].get_text('\n', strip=True).split('=')[-1]
         temp_json = json.loads(all_image[:-1])
-        with open('data/temp.json', 'w', encoding='utf-8') as file:
-            json.dump(temp_json, file, ensure_ascii=False, indent=4)
-        for image in all_image:
-            print(image)
-            img = 'https://www.arteks.ooo' + image.get('href')
-            img1 = image.get('src')
-            print(img)
-            # print(img1)
 
-        break
-    break
+        #get data from json
+        for model in temp_json:
+            mod = temp_json[model]
+            textures = mod['textures']
+
+            # download and save images
+            for texture in textures:
+                path = texture['mini']
+                name = path.split('/')[-1]
+                imgurl = 'https://www.arteks.ooo' + path
+                res = requests.get(url=imgurl, headers=headers, verify=False)
+                content = res.content
+                with open(Path(f'data/images/{collection}_{name}'), 'wb') as file:
+                    file.write(content)
+            break
