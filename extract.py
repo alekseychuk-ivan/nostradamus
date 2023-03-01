@@ -6,6 +6,9 @@ from torchvision.transforms import transforms
 from PIL import Image
 from pathlib import Path
 import os
+import json
+import tqdm
+import pickle
 
 
 class Img2VecResnet18:
@@ -21,21 +24,27 @@ class Img2VecResnet18:
             transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])])
 
     def getVec(self, img):
-        img = self.transform(img).unsqueeze(dim=0)
-        image = self.model(img).flatten()
+        img = self.transform(img).unsqueeze(dim=0).to(self.device)
+        image = self.model(img).flatten().to('cpu')
 
         return (image / torch.linalg.norm(image)).detach().numpy()
-
 
 
 # generate vectors for all the images in the set
 img2vec = Img2VecResnet18()
 
-since = time.time()
-allVectors = {}
+with open(Path('data/catalog.json'), 'r', encoding='utf-8') as file:
+    data = json.load(file)
+
+allVectors = []
 print("Converting images to feature vectors:")
-for image in os.listdir(Path('data/images')):
-    I = Image.open(os.path.join('data/images', image))
-    vec = img2vec.getVec(I)
-    allVectors[image] = vec
-    I.close()
+for d in tqdm.tqdm(data):
+    for image in d:
+        I = Image.open(os.path.join('data/images', image))
+        vec = img2vec.getVec(I)
+        allVectors.append(vec)
+        I.close()
+
+tensor = torch.tensor(allVectors)
+with open(Path('data/allvectors.pt'), 'wb',) as file:
+    pickle.dump(allVectors, file)
