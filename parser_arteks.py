@@ -15,7 +15,7 @@ headers = {
 url = 'https://www.arteks.ooo/catalog/'
 pagenurl = 'https://www.arteks.ooo/catalog/?PAGEN_1='
 
-#read catalog page
+# read catalog page
 result = requests.get(url=url, verify=False, headers=headers)
 if result.status_code == 200:
     soup = BeautifulSoup(result.text, 'lxml')
@@ -50,7 +50,7 @@ if result.status_code == 200:
             temp_json = json.loads(all_image[:-1])
             catalog_dct.update(temp_json)
 
-            #get data from json
+            # get data from json
             for model in temp_json:
                 mod = temp_json[model]
                 textures = mod['textures']
