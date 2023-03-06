@@ -5,7 +5,7 @@ import torch.nn as nn
 
 
 class Img2VecResnet18:
-    def __init__(self):
+    def __init__(self, device=None):
         self.device = torch.device('cuda' if torch.cuda.is_available() else "cpu")
         self.modelName = "resnet-18"
         self.model = nn.Sequential(*list(resnet18(weights="ResNet18_Weights.DEFAULT").children())[:-1])
@@ -15,6 +15,8 @@ class Img2VecResnet18:
             transforms.Resize((224, 224)),
             transforms.ToTensor(),
             transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])])
+        if device is not None:
+            self.device = device
 
     def getVec(self, img):
         img = self.transform(img).unsqueeze(dim=0).to(self.device)

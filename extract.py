@@ -10,6 +10,7 @@ from utils.Img2vec import Img2VecResnet18
 
 
 if __name__ == "__main__":
+    device = torch.device('cuda' if torch.cuda.is_available() else "cpu")
     # generate vectors for all the images in the set
     img2vec = Img2VecResnet18()
 
@@ -25,11 +26,10 @@ if __name__ == "__main__":
             allVectors.append(vec)
             I.close()
 
-    tensor = torch.tensor(allVectors)
-    input = tensor[0, :].unsqueeze(dim=0)
+    tensor = torch.stack(allVectors).to(device)
+    input = tensor[0, :].unsqueeze(dim=0).to(device)
     cos = nn.CosineSimilarity(dim=1, eps=1e-6)
     dist = cos(tensor, input)
     pdist, idx = torch.sort(dist, descending=True)
-
-    with open(Path('data/allvectors.pt'), 'w',) as file:
-        pickle.dump(allVectors, file)
+    # with open(Path('data/allvectors.pt'), 'wb',) as file:
+    #     torch.save(tensor.to('cpu'), file)
