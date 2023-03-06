@@ -27,9 +27,9 @@ if __name__ == "__main__":
             I.close()
 
     tensor = torch.stack(allVectors).to(device)
-    input = tensor[0, :].unsqueeze(dim=0).to(device)
-    cos = nn.CosineSimilarity(dim=1, eps=1e-6)
-    dist = cos(tensor, input)
-    pdist, idx = torch.sort(dist, descending=True)
-    # with open(Path('data/allvectors.pt'), 'wb',) as file:
-    #     torch.save(tensor.to('cpu'), file)
+    # input = tensor[0, :].unsqueeze(dim=0).to(device)
+    # cos = nn.CosineSimilarity(dim=1, eps=1e-6)
+    # dist = cos(tensor, input)
+    # pdist, idx = torch.sort(dist, descending=True)
+    with open(Path('data/allvectors.pt'), 'wb',) as file:
+        torch.save(tensor.to('cpu'), file)
