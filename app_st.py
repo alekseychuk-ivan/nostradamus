@@ -53,16 +53,25 @@ if uploaded_file is not None:
         # st.text(features)
 
         # recommendation
-        indices = recommend(features, tensor).tolist()[:1]
+        indices = recommend(features, tensor).tolist()
 
         # show
-        col1 = st.columns(1)  # col2, col3, col4, col5
-        for i, idx in enumerate(indices):
-            print(i, idx)
+        col = st.columns(5, gap='small')  # col2, col3, col4, col5
+        i = 0
+        dataset = set()
+        for idx in indices:
+            if i > 4:
+                break
             dct = catalog[idx]
             name = list(dct.keys())[0]
-            with col1:
-                display_image = Image.open(os.path.join('data/images', name))
-                st.image(np.asarray(display_image))
+            col_data = dct[name]
+            if tuple(col_data) not in dataset:
+                dataset.add(tuple(col_data))
+                with col[i]:
+                    i += 1
+                    display_image = Image.open(os.path.join('data/images', name))
+                    st.text(f'{col_data[1]}, {col_data[0]}')
+                    # st.text(f'номер {col_data[0]}')
+                    st.image(display_image)
     else:
         st.header("Some error occured in file upload")
