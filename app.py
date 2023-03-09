@@ -1,66 +1,46 @@
-import streamlit as st
+# import streamlit as st
 import os
-from PIL import Image
-import numpy as np
-from numpy.linalg import norm
+from pathlib import Path
+import torch
+import torch.nn as nn
 from utils.Img2vec import Img2VecResnet18
+from fastapi import FastAPI
+from PIL import Image
+import json
+import shutil
 
+app = FastAPI(title='Walpaper Rescomendation System')
 
 model = Img2VecResnet18()
 
-st.title('Fashion Recommender System')
+with open(Path('data/allvectors.pt'), 'rb') as file:
+    allvectors = torch.load(file)
 
-# def save_uploaded_file(uploaded_file):
-#     try:
-#         with open(os.path.join('uploads',uploaded_file.name),'wb') as f:
-#             f.write(uploaded_file.getbuffer())
-#         return 1
-#     except:
-#         return 0
-#
-# def feature_extraction(img_path,model):
-#     img = image.load_img(img_path, target_size=(224, 224))
-#     img_array = image.img_to_array(img)
-#     expanded_img_array = np.expand_dims(img_array, axis=0)
-#     preprocessed_img = preprocess_input(expanded_img_array)
-#     result = model.predict(preprocessed_img).flatten()
-#     normalized_result = result / norm(result)
-#
-#     return normalized_result
-#
-# def recommend(features,feature_list):
-#     neighbors = NearestNeighbors(n_neighbors=6, algorithm='brute', metric='euclidean')
-#     neighbors.fit(feature_list)
-#
-#     distances, indices = neighbors.kneighbors([features])
-#
-#     return indices
-#
-# # steps
-# # file upload -> save
-# uploaded_file = st.file_uploader("Choose an image")
-# if uploaded_file is not None:
-#     if save_uploaded_file(uploaded_file):
-#         # display the file
-#         display_image = Image.open(uploaded_file)
-#         st.image(display_image)
-#         # feature extract
-#         features = feature_extraction(os.path.join("uploads",uploaded_file.name),model)
-#         #st.text(features)
-#         # recommendention
-#         indices = recommend(features,feature_list)
-#         # show
-#         col1,col2,col3,col4,col5 = st.beta_columns(5)
-#
-#         with col1:
-#             st.image(filenames[indices[0][0]])
-#         with col2:
-#             st.image(filenames[indices[0][1]])
-#         with col3:
-#             st.image(filenames[indices[0][2]])
-#         with col4:
-#             st.image(filenames[indices[0][3]])
-#         with col5:
-#             st.image(filenames[indices[0][4]])
-#     else:
-#         st.header("Some error occured in file upload")
+with open(Path('data/catalog.json'), 'r', encoding='utf-8') as file:
+    catalog = json.load(file)
+
+device = torch.device('cuda' if torch.cuda.is_available() else "cpu")
+
+for dir, _, files in os.walk(Path('data/test')):
+    for image in files:
+        I = Image.open(Path(os.path.join('data/test', image)))
+        vec = model.getVec(I)
+        vec = vec.unsqueeze(dim=0).to(device)
+        cos = nn.CosineSimilarity(dim=1, eps=1e-6)
+        dist = cos(allvectors, vec)
+        pdist, idx = torch.sort(dist, descending=True)
+        idx = idx.tolist()[:]
+        st = set()
+        for i in idx:
+            dct = catalog[i]
+            for name in dct:
+                value = dct[name]
+                if tuple(value) not in st:
+                    st.add(tuple(value))
+                    path = Path(os.path.join('data/images', name))
+                    # im = Image.open(path)
+                    # # show image
+                    # im.show()
+                    shutil.copy(path, os.path.join('data/rec', name))
+            if len(st) > 5:
+                break
