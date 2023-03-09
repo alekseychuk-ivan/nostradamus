@@ -6,7 +6,6 @@ from utils.Img2vec import Img2VecResnet18
 from pathlib import Path
 import json
 import torch.nn as nn
-import numpy as np
 
 model = Img2VecResnet18()
 

@@ -3,6 +3,7 @@ import requests
 from bs4 import BeautifulSoup
 from pathlib import Path
 import json
+import os
 
 requests.packages.urllib3.disable_warnings()
 headers = {
@@ -14,6 +15,9 @@ headers = {
 
 url = 'https://www.arteks.ooo/catalog/'
 pagenurl = 'https://www.arteks.ooo/catalog/?PAGEN_1='
+
+if not os.path.exists(Path('data/images')):
+    os.mkdir(Path('data/images'))
 
 # read catalog page
 result = requests.get(url=url, verify=False, headers=headers)

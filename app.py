@@ -1,4 +1,3 @@
-# import streamlit as st
 import os
 from pathlib import Path
 import torch
@@ -10,8 +9,8 @@ import json
 import shutil
 
 app = FastAPI(title='Walpaper Rescomendation System')
-
-model = Img2VecResnet18()
+device = torch.device('cuda' if torch.cuda.is_available() else "cpu")
+model = Img2VecResnet18(device=device)
 
 with open(Path('data/allvectors.pt'), 'rb') as file:
     allvectors = torch.load(file)
@@ -19,13 +18,14 @@ with open(Path('data/allvectors.pt'), 'rb') as file:
 with open(Path('data/catalog.json'), 'r', encoding='utf-8') as file:
     catalog = json.load(file)
 
-device = torch.device('cuda' if torch.cuda.is_available() else "cpu")
+if not os.path.exists(Path('data/rec')):
+    os.mkdir(Path('data/rec'))
 
-for dir, _, files in os.walk(Path('data/test')):
+for folder, _, files in os.walk(Path('data/test')):
     for image in files:
-        I = Image.open(Path(os.path.join('data/test', image)))
+        I = Image.open(Path(os.path.join(folder, image)))
         vec = model.getVec(I)
-        vec = vec.unsqueeze(dim=0).to(device)
+        vec = vec.unsqueeze(dim=0).to('cpu')
         cos = nn.CosineSimilarity(dim=1, eps=1e-6)
         dist = cos(allvectors, vec)
         pdist, idx = torch.sort(dist, descending=True)
