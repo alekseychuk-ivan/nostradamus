@@ -19,7 +19,7 @@ with open(Path('data/catalog.json'), 'r', encoding='utf-8') as file:
     catalog = json.load(file)
 
 if not os.path.exists(Path('data/rec')):
-    os.mkdir(Path('data/rec'))
+    Path('data/rec').mkdir(parents=True)
 
 for folder, _, files in os.walk(Path('data/test')):
     for image in files:

@@ -17,7 +17,7 @@ url = 'https://www.arteks.ooo/catalog/'
 pagenurl = 'https://www.arteks.ooo/catalog/?PAGEN_1='
 
 if not os.path.exists(Path('data/images')):
-    os.mkdir(Path('data/images'))
+    Path('data/images').mkdir(parents=True)
 
 # read catalog page
 result = requests.get(url=url, verify=False, headers=headers)
