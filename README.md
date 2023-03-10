@@ -1,4 +1,4 @@
-# nostradamus - immage reccomended system for wallpapers
+# nostradamus - image recommended system for wallpapers
 
 install dependencies:
 pip install -r requirements.txt
