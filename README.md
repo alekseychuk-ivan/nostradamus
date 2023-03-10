@@ -1,9 +1,9 @@
-# nostradamus - immage reccomended system for walpapers
+# nostradamus - immage reccomended system for wallpapers
 
 install dependencies:
 pip install -r requirements.txt
 
-for download walpaperы from server run:
+for download wallpapers from server run:
 python parser_arteks.py
 
 for extarct data from images run:
