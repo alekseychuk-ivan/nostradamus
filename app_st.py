@@ -9,7 +9,9 @@ import torch.nn as nn
 
 model = Img2VecResnet18()
 
-st.title('Walpaper Recommender System')
+st.title('Wallpapers Recommender System')
+if not os.path.exists(Path('data/images')):
+    os.mkdir(Path('data/test'))
 
 with open(Path('data/catalog.json'), 'r', encoding='utf-8') as file:
     catalog = json.load(file)
