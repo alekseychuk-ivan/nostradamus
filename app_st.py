@@ -5,7 +5,6 @@ import torch
 from utils.Img2vec import Img2VecResnet18, recommend
 from pathlib import Path
 import json
-import torch.nn as nn
 
 model = Img2VecResnet18()
 
@@ -13,11 +12,11 @@ st.title('Wallpapers Recommender System')
 if not os.path.exists(Path('data/images')):
     Path('data/test').mkdir(parents=True)
 
-with open(Path('data/catalog.json'), 'r', encoding='utf-8') as file:
+with open(Path('catalog/catalog.json'), 'r', encoding='utf-8') as file:
     catalog = json.load(file)
-with open(Path('data/allvectors.pt'), 'rb', ) as file:
+with open(Path('catalog/allvectors.pt'), 'rb', ) as file:
     tensor = torch.load(file)
-with open(Path('data/catalog_arteks.json'), 'r', encoding='utf-8') as file:
+with open(Path('catalog/catalog_arteks.json'), 'r', encoding='utf-8') as file:
     catalog_arteks = json.load(file)
 
 

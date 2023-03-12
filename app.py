@@ -12,10 +12,10 @@ app = FastAPI(title='Walpaper Rescomendation System')
 device = torch.device('cuda' if torch.cuda.is_available() else "cpu")
 model = Img2VecResnet18(device=device)
 
-with open(Path('data/allvectors.pt'), 'rb') as file:
+with open(Path('catalog/allvectors.pt'), 'rb') as file:
     allvectors = torch.load(file)
 
-with open(Path('data/catalog.json'), 'r', encoding='utf-8') as file:
+with open(Path('catalog/catalog.json'), 'r', encoding='utf-8') as file:
     catalog = json.load(file)
 
 if not os.path.exists(Path('data/rec')):

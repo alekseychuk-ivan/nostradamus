@@ -12,7 +12,7 @@ if __name__ == "__main__":
     # generate vectors for all the images in the set
     img2vec = Img2VecResnet18()
 
-    with open(Path('data/catalog.json'), 'r', encoding='utf-8') as file:
+    with open(Path('catalog/catalog.json'), 'r', encoding='utf-8') as file:
         data = json.load(file)
 
     allVectors = []
@@ -25,5 +25,5 @@ if __name__ == "__main__":
             I.close()
 
     tensor = torch.stack(allVectors).to(device)
-    with open(Path('data/allvectors.pt'), 'wb',) as file:
+    with open(Path('catalog/allvectors.pt'), 'wb', ) as file:
         torch.save(tensor.to('cpu'), file)

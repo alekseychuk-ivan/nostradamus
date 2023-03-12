@@ -5,9 +5,13 @@ services:
       context: .
       dockerfile: Dockerfile
     ports:
-      - "8000:8000"
+      - "8000:8001"
     volumes:
       - .:/code
 
     environment:
       FLASK_DEBUG: "true"
+networks:
+  default:
+    external:
+      name: nostradamus-network

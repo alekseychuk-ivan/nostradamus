@@ -71,10 +71,10 @@ if result.status_code == 200:
                         file.write(content)
                 break
 
-    with open(Path('data/catalog_arteks.json'), 'w', encoding='utf-8') as file:
+    with open(Path('catalog/catalog_arteks.json'), 'w', encoding='utf-8') as file:
         json.dump(catalog_dct, file, indent=4, ensure_ascii=False)
 
-    with open(Path('data/catalog.json'), 'w', encoding='utf-8') as file:
+    with open(Path('catalog/catalog.json'), 'w', encoding='utf-8') as file:
         json.dump(image_dct, file, indent=4, ensure_ascii=False)
 else:
     print(f'Error {result.status_code}')
