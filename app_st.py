@@ -2,7 +2,7 @@ import streamlit as st
 import os
 from PIL import Image
 import torch
-from utils.Img2vec import Img2VecResnet18
+from utils.Img2vec import Img2VecResnet18, recommend
 from pathlib import Path
 import json
 import torch.nn as nn
@@ -28,15 +28,6 @@ def save_uploaded_file(uploaded_file):
         return 1
     except:
         return 0
-
-
-def recommend(vec, feature_list, device='cpu'):
-    vec = vec.unsqueeze(dim=0).to(device)
-    cos = nn.CosineSimilarity(dim=1, eps=1e-6)
-    dist = cos(feature_list, vec)
-    pdist, idx = torch.sort(dist, descending=True)
-
-    return idx
 
 
 # steps

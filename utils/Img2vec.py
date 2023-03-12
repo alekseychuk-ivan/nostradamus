@@ -23,3 +23,12 @@ class Img2VecResnet18:
         image = self.model(img).flatten().to('cpu')
 
         return (image / torch.linalg.norm(image)).detach()
+
+
+def recommend(vec, feature_list, device='cpu'):
+    vec = vec.unsqueeze(dim=0).to(device)
+    cos = nn.CosineSimilarity(dim=1, eps=1e-6)
+    dist = cos(feature_list, vec)
+    pdist, idx = torch.sort(dist, descending=True)
+
+    return idx
