@@ -39,9 +39,7 @@ async def home(request: Request):
                 </div>
                 <div>
                     <label>Select Number of image</label>
-                        <select name="number">
-                            <option>5</option>                            
-                        </select> 
+                        <input name="number" type='text'  step='1'>                            
                 </div>
         </div>
         <button type="submit">Submit</button>
