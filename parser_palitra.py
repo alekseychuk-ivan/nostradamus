@@ -42,10 +42,17 @@ if result.status_code == 200:
             # create new link
             link = url + product.find(class_='item-card__card-full-link').get('href')
             result = requests.get(link, verify=False, headers=headers)
+            if result.status_code != 200:
+                print(f'Страница {link} не найдена. Error {result.status_code}')
+                continue
             soup = BeautifulSoup(result.text, 'lxml')
 
             # find name collection and model
-            collection = soup.find('a', class_='model-caption').get_text('\n', strip=True)
+            collection = soup.find('a', class_='model-caption')
+            if collection:
+                collection = collection.get_text('\n', strip=True)
+            else:
+                collection = 'Noname collection'
             print(f'Загружается коллекция {collection}.')
             model = soup.find('div', class_='article-caption prov-text').get_text('\n', strip=True)
 
