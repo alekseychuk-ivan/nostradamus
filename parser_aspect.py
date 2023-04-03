@@ -55,7 +55,6 @@ if result.status_code == 200:
             print(f'Загружается коллекция {collection}.')
 
             all_image = soup.find('div', class_='swiper-wrapper').find_all('div', class_='swiper-slide')
-            print(all_image)
             for image in all_image:
                 imgurl = url + image.find('img').get('src')
                 name = imgurl.split('/')[-1]
