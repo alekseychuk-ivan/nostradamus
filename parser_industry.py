@@ -52,7 +52,6 @@ if result.status_code == 200:
             all_image = soup.find_all('li', class_='small_pic__point')[:]
             for image in all_image:
                 imgurl = url + image.find('a').get('href')
-                print(imgurl)
                 name = imgurl.split('/')[-1]
                 res = requests.get(url=imgurl, headers=headers, verify=False)
                 content = res.content
@@ -60,7 +59,7 @@ if result.status_code == 200:
                 with open(Path(f'data/images/{name}'), 'wb') as file:
                     file.write(content)
 
-    with open(Path('catalog/catalog_industry.json'), 'w', encoding='utf-8') as file:
+    with open(Path('catalog/industry.json'), 'w', encoding='utf-8') as file:
         json.dump(image_dct, file, indent=4, ensure_ascii=False)
 else:
     print(f'Error {result.status_code}')

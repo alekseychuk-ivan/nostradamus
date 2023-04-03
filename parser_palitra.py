@@ -3,7 +3,6 @@ from bs4 import BeautifulSoup
 from pathlib import Path
 import json
 import os
-import re
 
 requests.packages.urllib3.disable_warnings()
 headers = {
@@ -13,9 +12,9 @@ headers = {
                   'Safari/537.36 '
 }
 
-url = 'http://industry-wp.ru'
-catalogurl = 'http://industry-wp.ru/wallpapers'
-pagenurl = 'http://industry-wp.ru/wallpapers/page/'
+url = 'https://oboi-palitra.ru'
+catalogurl = 'https://oboi-palitra.ru/oboi'
+pagenurl = 'https://oboi-palitra.ru/oboi/?PAGEN_1='
 
 if not os.path.exists(Path('data/images')):
     Path('data/images').mkdir(parents=True)
@@ -25,7 +24,9 @@ if result.status_code == 200:
     soup = BeautifulSoup(result.text, 'lxml')
 
     # find count of page
-    cnt_page = int(soup.find_all('a', class_='pagination__link')[-1].get_text())
+    cnt_page = int(soup.find_all('ul', class_='claims-pager')[-1].
+                   find_all('a', href=True)[-1].get('href').split('=')[-1])
+
     image_dct = []
 
     for page in range(1, cnt_page + 1):
@@ -33,26 +34,24 @@ if result.status_code == 200:
         result = requests.get(url=f'{pagenurl}{page}', verify=False)
         soup = BeautifulSoup(result.text, 'lxml')
         # find all collection and download images for collection
-        all_products = soup.find_all('div', class_='product_tile__top')
+        all_products = soup.find_all('div', class_='col-12 col-md-4 col-xl-3 item-card__card-wrapper')
         print(f'Найдено {len(all_products)} коллекций.')
         for product in all_products:
 
             # request page of product
             # create new link
-            link = url + product.find(class_='product_tile__image_holder_own').get('href')
+            link = url + product.find(class_='item-card__card-full-link').get('href')
             result = requests.get(link, verify=False, headers=headers)
             soup = BeautifulSoup(result.text, 'lxml')
 
             # find name collection and model
-            collection = soup.find('h1', class_="product_title").span.get_text()
-            name = soup.find('h1', class_="product_title").get_text('\n', strip=True)
-            model = ' '.join(name.split()[len(collection.split()):])
+            collection = soup.find('a', class_='model-caption').get_text('\n', strip=True)
             print(f'Загружается коллекция {collection}.')
+            model = soup.find('div', class_='article-caption prov-text').get_text('\n', strip=True)
 
-            all_image = soup.find_all('li', class_='small_pic__point')[:]
+            all_image = soup.find_all('div', class_='product-block__grid-item item-col-2')[:]
             for image in all_image:
-                imgurl = url + image.find('a').get('href')
-                print(imgurl)
+                imgurl = image.find('img').get('src')
                 name = imgurl.split('/')[-1]
                 res = requests.get(url=imgurl, headers=headers, verify=False)
                 content = res.content
@@ -60,7 +59,7 @@ if result.status_code == 200:
                 with open(Path(f'data/images/{name}'), 'wb') as file:
                     file.write(content)
 
-    with open(Path('catalog/catalog_industry.json'), 'w', encoding='utf-8') as file:
+    with open(Path('catalog/palitra.json'), 'w', encoding='utf-8') as file:
         json.dump(image_dct, file, indent=4, ensure_ascii=False)
 else:
     print(f'Error {result.status_code}')
