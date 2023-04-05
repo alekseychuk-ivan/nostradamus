@@ -6,7 +6,6 @@ import json
 import tqdm
 from utils.Img2vec import Img2VecResnet18
 
-
 if __name__ == "__main__":
     device = torch.device('cuda' if torch.cuda.is_available() else "cpu")
     # generate vectors for all the images in the set
@@ -26,11 +25,14 @@ if __name__ == "__main__":
         print(f"Converting images from {catalog.split('.')[0]} to feature vectors:")
         for d in tqdm.tqdm(data):
             for image in d:
-                I = Image.open(os.path.join('data/images', image))
-                vec = img2vec.getVec(I)
-                allVectors.append(vec)
-                allCatalog.append(d)
-                I.close()
+                try:
+                    I = Image.open(Path(os.path.join('data/images', image)))
+                    vec = img2vec.getVec(I)
+                    allVectors.append(vec)
+                    allCatalog.append(d)
+                    I.close()
+                except:
+                    continue
 
         tensor = torch.stack(allVectors).to(device)
     with open(Path('catalog/allvectors.pt'), 'wb', ) as file:
